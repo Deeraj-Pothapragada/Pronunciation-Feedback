@@ -1,6 +1,6 @@
 FROM continuumio/miniconda3
 
-RUN conda create -y -n mfa -c conda-forge python=3.9 montreal-forced-aligner ffmpeg cmake make pkg-config libsndfile joblib=1.4.2
+RUN conda create -y -n mfa -c conda-forge python=3.9 montreal-forced-aligner ffmpeg cmake make pkg-config libsndfile joblib=1.3.2
 
 RUN conda create -y -n app -c conda-forge python=3.9 ffmpeg
 RUN conda run -n app pip install \
@@ -46,6 +46,7 @@ CMD ["conda", "run", "--no-capture-output", "-n", "app", \
 # ENV PATH /opt/conda/envs/mfa/bin:$PATH
 
 # CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:10000"]
+
 
 
 
