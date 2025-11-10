@@ -1,4 +1,4 @@
-import parselmouth 
+import parselmouth
 from praatio import textgrid
 
 def get_info(audio_path, textgrid_path, tier_name="phones"):
@@ -24,7 +24,6 @@ def get_info(audio_path, textgrid_path, tier_name="phones"):
         return (sum(f1)/len(f1), sum(f2)/len(f2))
 
     segments = get_phoneme_segments(textgrid_path, tier_name)
-#     return [(label, end - start, get_formants(start, end)) for start, end, label in segments]
     return [(label, end - start) for start, end, label in segments]
 
 
@@ -33,10 +32,7 @@ def compare_infos(user_wav, user_textgrid, ref_wav, ref_textgrid):
     ref_info = get_info(ref_wav, ref_textgrid)
     comparisons = []
     for (u_label, u_dur), (r_label, r_dur) in zip(user_info, ref_info):
-        if u_label == r_label and u_f1 and r_f1:
+        if u_label == r_label:
             diff_length = u_dur - r_dur
-            # diff_f1 = u_f1 - r_f1
-            # diff_f2 = u_f2 - r_f2
             comparisons.append(f"{u_label}: ΔLength = {diff_length:.2f}")
     return "\n ".join(comparisons)
-
