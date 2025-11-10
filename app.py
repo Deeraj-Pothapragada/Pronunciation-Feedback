@@ -7,14 +7,14 @@ import shutil
 import subprocess
 import random
 import pandas as pd
-import parselmouth 
+import parselmouth
 from praatio import textgrid
 from comparison import compare_infos
 app = Flask(__name__)
 
 
-LEXICON = "japanese_mfa.dict"
-MFA_MODEL = "japanese_mfa_acoustic"
+LEXICON = "japanese_mfa"
+MFA_MODEL = "japanese_mfa"
 UPLOAD_FOLDER = "/tmp/uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -62,7 +62,7 @@ def align():
     user_lab = os.path.join(session_path, "user.lab")
     make_lab(target_word, user_lab)
 
-    user_textgrid = os.path.join(session_path, "user.TextGrid") 
+    user_textgrid = os.path.join(session_path, "user.TextGrid")
 
 
     ref_wav = os.path.join(session_path, "ref.wav")
@@ -117,22 +117,28 @@ def run_mfa(corpus_dir, dict_path, model_path, output_dir):
         output_dir
     ]
 
-    # mfa_cmd = [
-    #     "mfa", "align",
-    #     corpus_dir,
-    #     dict_path,
-    #     model_path,
-    #     output_dir
-    # ]
-    process = subprocess.Popen(
-    mfa_cmd,
-    stdout=sys.stdout,
-    stderr=sys.stderr
-    )
-    process.wait()
+    print(f"Executing MFA command: {' '.join(mfa_cmd)}", file=sys.stdout) # Diagnostic line
 
-    if process.returncode != 0:
-        raise RuntimeError(f"MFA failed with return code {process.returncode}")
+    try:
+        result = subprocess.run(
+            mfa_cmd,
+            check=True,  
+            capture_output=True,
+            text=True
+        )
+
+        print("\n--- MFA STDOUT (Success) ---\n", result.stdout, file=sys.stdout)
+        return True
+
+    except subprocess.CalledProcessError as e:
+        print("\n--- MFA SUBPROCESS FAILED! ---", file=sys.stderr)
+        print(f"Command: {e.cmd}", file=sys.stderr)
+        print(f"Return Code: {e.returncode}", file=sys.stderr)
+
+        print("\n--- MFA STDOUT ---", file=sys.stderr)
+        print(e.stdout, file=sys.stderr)
+        print("\n--- MFA STDERR ---", file=sys.stderr)
+        print(e.stderr, file=sys.stderr)
 
 
 
@@ -155,15 +161,9 @@ def convert_to_wav(file_storage, output_path):
         print("FFmpeg error:", process.stderr)
         raise RuntimeError("Audio conversion failed")
 
-    os.remove(temp_input)  
+    os.remove(temp_input)
     return output_path
 
-
-
-
-# if __name__ == "__main__":
-#     print("Starting Flask test server...")
-#     app.run(host="0.0.0.0", port=5000, debug=True)
 
 
 
